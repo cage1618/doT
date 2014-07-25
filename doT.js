@@ -13,8 +13,9 @@ var fs = require('fs');
 			evaluate:    /\{\{([\s\S]+?(\}?)+)\}\}/g,
 			interpolate: /\{\{=([\s\S]+?)\}\}/g,
 			encode:      /\{\{!([\s\S]+?)\}\}/g,
+			json:        /\{\{\$([\s\S]+?)\}\}/g,
 			use:         /\{\{#([\s\S]+?)\}\}/g,
-			include:         /\{\{>([\s\S]+?)\}\}/g,
+			include:     /\{\{>([\s\S]+?)\}\}/g,
 			useParams:   /(^|[^\w$])def(?:\.|\[[\'\"])([\w$\.]+)(?:[\'\"]\])?\s*\:\s*([\w$\.]+|\"[^\"]+\"|\'[^\']+\'|\{[^\}]+\})/g,
 			define:      /\{\{##\s*([\w\.$]+)\s*(\:|=)([\s\S]+?)#\}\}/g,
 			defineParams:/^\s*([\w$]+):([\s\S]+)/,
@@ -128,6 +129,9 @@ var fs = require('fs');
 				needhtmlencode = true;
 				return cse.start + unescape(code) + cse.endencode;
 			})
+            .replace(c.json || skip, function(m, code) {
+				return cse.start + 'JSON.stringify('+ unescape(code)  + ')'+ cse.end;
+            })
 			.replace(c.conditional || skip, function(m, elsecase, code) {
 				return elsecase ?
 					(code ? "';}else if(" + unescape(code) + "){out+='" : "';}else{out+='") :
